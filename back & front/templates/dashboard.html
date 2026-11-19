@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Beranda{% endblock %}
+{% block body %}
+{% include "navbar.html" %}
+
+<main class="isi">
+  <!-- Ringkasan Saldo -->
+  <section class="saldo" aria-label="Saldo">
+    <div class="kartu" id="kotak-tangan">
+      <small>Kas di Tangan</small>
+      <b id="saldo-tangan">…</b>
+      <small class="redup">Uang tunai di laci</small>
+    </div>
+    <div class="kartu" id="kotak-bank">
+      <small>Kas di Bank</small>
+      <b id="saldo-bank">…</b>
+      <small class="redup">Rekening, termasuk hasil QRIS</small>
+    </div>
+    <div class="kartu" id="kotak-kecil">
+      <div class="baris-header-kartu">
+        <small>Kas Kecil</small>
+        <span id="peringatan-kecil" class="badge-merah" hidden>Menipis</span>
+      </div>
+      <b id="saldo-kecil">…</b>
+      <small class="redup">Operasional Toko Harian</small>
+    </div>
+    <div class="kartu" id="kotak-total">
+      <small>Total Kas</small>
+      <b id="saldo-total">…</b>
+      <small class="redup">Tangan + Bank + Kas Kecil</small>
+    </div>
+  </section>
+
+  <!-- Ringkasan Hari Ini -->
+  <section class="kartu">
+    <div class="baris-header-kartu">
+      <h2>Ringkasan Hari Ini</h2>
+      <small id="tgl-hari-ini" class="redup"></small>
+    </div>
+    <div class="ringkasan-grid">
+      <div class="kartu-metrik masuk">
+        <small>Pemasukan Hari Ini</small>
+        <div id="hari-masuk" class="angka-metrik plus">…</div>
+      </div>
+      <div class="kartu-metrik keluar">
+        <small>Pengeluaran Hari Ini</small>
+        <div id="hari-keluar" class="angka-metrik minus">…</div>
+      </div>
+      <div class="kartu-metrik selisih">
+        <small>Arus Bersih Hari Ini</small>
+        <div id="hari-selisih" class="angka-metrik">…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Aksi Cepat -->
+  <section class="kartu">
+    <h2>Aksi Cepat</h2>
+    <div class="aksi-cepat-grid">
+      <a href="/transaksi" class="tombol-aksi utama-link">
+        <span class="icon">➕</span>
+        <div>
+          <strong>Catat Transaksi</strong>
+          <small>Input pemasukan atau pengeluaran baru</small>
+        </div>
+      </a>
+      <a href="/kas-kecil" class="tombol-aksi sekunder-link">
+        <span class="icon">🔄</span>
+        <div>
+          <strong>Kas Kecil & Isi Ulang</strong>
+          <small>Pantau pengeluaran toko & isi ulang</small>
+        </div>
+      </a>
+      {% if role == 'pemilik' %}
+      <a href="/laporan" class="tombol-aksi sekunder-link">
+        <span class="icon">📊</span>
+        <div>
+          <strong>Laporan & Excel</strong>
+          <small>Buku kas, rekap laba rugi, dan unduh data</small>
+        </div>
+      </a>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- 5 Transaksi Terakhir -->
+  <section class="kartu">
+    <div class="baris-header-kartu">
+      <h2>Transaksi Terakhir</h2>
+      <a href="/transaksi" class="tautan-semua">Lihat Semua ›</a>
+    </div>
+    <div class="tabel-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Kategori & Keterangan</th>
+            <th>Kas</th>
+            <th class="kanan">Nominal</th>
+          </tr>
+        </thead>
+        <tbody id="isi-terakhir"></tbody>
+      </table>
+    </div>
+    <p id="kosong-terakhir" class="redup" hidden>Belum ada transaksi.</p>
+  </section>
+</main>
+
+<div id="toast" role="status" aria-live="polite" hidden></div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

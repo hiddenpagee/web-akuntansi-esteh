@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Jurnal Umum{% endblock %}
+{% block body %}
+{% include "navbar.html" %}
+
+<main class="isi">
+  <section class="kartu">
+    <div class="baris-header-kartu">
+      <h2>Jurnal Umum</h2>
+      <small id="periode-label" class="redup"></small>
+    </div>
+    <p class="redup ringkas-teks">Tersusun otomatis dari transaksi yang sudah dicatat. Tiap transaksi menjadi satu entri dengan total debit sama dengan total kredit.</p>
+    <form id="form-jurnal" class="filter-laporan" novalidate>
+      <div class="baris-filter">
+        <div>
+          <label for="pilih-periode">Periode</label>
+          <select id="pilih-periode">
+            <option value="harian">Harian</option>
+            <option value="mingguan">Mingguan (Senin–Minggu)</option>
+            <option value="bulanan" selected>Bulanan</option>
+            <option value="custom">Rentang Tanggal (Custom)</option>
+          </select>
+        </div>
+        <div id="kotak-tanggal-acuan">
+          <label for="tgl-acuan">Tanggal Acuan</label>
+          <input id="tgl-acuan" type="date">
+        </div>
+        <div id="kotak-tanggal-custom-dari" hidden>
+          <label for="tgl-dari">Dari Tanggal</label>
+          <input id="tgl-dari" type="date">
+        </div>
+        <div id="kotak-tanggal-custom-sampai" hidden>
+          <label for="tgl-sampai">Sampai Tanggal</label>
+          <input id="tgl-sampai" type="date">
+        </div>
+        <div class="filter-submit-col">
+          <label class="sr">Tampilkan</label>
+          <button id="btn-filter-jurnal" type="submit" class="utama">Tampilkan</button>
+        </div>
+      </div>
+    </form>
+    <div id="pesan-jurnal" class="alert" role="alert" hidden></div>
+  </section>
+
+  <section class="kartu" id="kotak-pembuka" hidden>
+    <h2>Jurnal Pembuka (Saldo Awal)</h2>
+    <div class="tabel-wrap">
+      <table>
+        <thead><tr><th>Akun</th><th class="kanan">Debit</th><th class="kanan">Kredit</th></tr></thead>
+        <tbody id="isi-pembuka"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="kartu">
+    <div class="baris-header-kartu">
+      <h2>Entri Jurnal</h2>
+      <span id="status-seimbang" class="status-seimbang"></span>
+    </div>
+    <div class="tabel-wrap">
+      <table>
+        <thead>
+          <tr><th>Tanggal</th><th>No.</th><th>Akun</th><th class="kanan">Debit</th><th class="kanan">Kredit</th></tr>
+        </thead>
+        <tbody id="isi-jurnal-umum"></tbody>
+      </table>
+    </div>
+    <p id="kosong-jurnal" class="redup" hidden>Belum ada transaksi pada periode ini.</p>
+  </section>
+</main>
+
+<div id="toast" role="status" aria-live="polite" hidden></div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/jurnal.js') }}"></script>
+{% endblock %}

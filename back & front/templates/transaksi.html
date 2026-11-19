@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Transaksi{% endblock %}
+{% block body %}
+{% include "navbar.html" %}
+
+<main class="isi">
+  <section class="saldo" aria-label="Saldo">
+    <div class="kartu" id="kotak-tangan"><small>Kas di Tangan</small><b id="saldo-tangan">…</b></div>
+    <div class="kartu" id="kotak-bank"><small>Kas di Bank</small><b id="saldo-bank">…</b></div>
+    <div class="kartu" id="kotak-kecil"><small>Kas Kecil</small><b id="saldo-kecil">…</b>
+      <span id="peringatan-kecil" class="badge-merah" hidden>Menipis</span></div>
+  </section>
+
+  <section class="kartu">
+    <h2>Catat transaksi</h2>
+    <div id="pesan-form" class="alert" role="alert" hidden></div>
+    <form id="form-transaksi" novalidate>
+      <fieldset class="segmen" id="grup-jenis">
+        <legend class="sr">Jenis</legend>
+        <label id="opsi-masuk"><input type="radio" name="jenis" value="masuk"><span>Pemasukan</span></label>
+        <label><input type="radio" name="jenis" value="keluar" checked><span>Pengeluaran</span></label>
+      </fieldset>
+
+      <div class="grid">
+        <div>
+          <label for="tanggal">Tanggal</label>
+          <div id="tgl-otomatis" class="tgl-otomatis"><span id="tgl-teks"></span></div>
+          <input id="tanggal" type="date" hidden>
+          <button type="button" id="ubah-tgl" class="tautan">Ubah</button>
+        </div>
+        <div>
+          <label for="nominal">Nominal (Rp)</label>
+          <input id="nominal" type="text" inputmode="numeric" autocomplete="off" placeholder="35.000" required>
+        </div>
+        <div>
+          <label for="kategori">Kategori</label>
+          <select id="kategori" required></select>
+        </div>
+        <div id="kotak-sumber">
+          <label for="sumber">Diambil dari</label>
+          <select id="sumber">
+            <option value="kecil">Kas Kecil</option>
+            <option value="tangan">Kas di Tangan</option>
+            <option value="bank">Kas di Bank</option>
+          </select>
+        </div>
+        <div>
+          <label for="metode">Metode bayar</label>
+          <select id="metode">
+            <option value="">— tidak ditentukan —</option>
+            <option value="tunai">Tunai</option>
+            <option value="qris">QRIS</option>
+          </select>
+          <small id="info-kas-masuk" class="redup" hidden>Tunai masuk ke Kas di Tangan, QRIS ke Kas di Bank.</small>
+        </div>
+        <div class="penuh">
+          <label for="keterangan">Keterangan <small class="redup">(opsional)</small></label>
+          <input id="keterangan" type="text" maxlength="200" placeholder="mis. Es batu 2 kantong">
+        </div>
+      </div>
+      <button id="btn-simpan" type="submit" class="utama">Simpan transaksi</button>
+    </form>
+  </section>
+
+  <section class="kartu">
+    <h2>Riwayat transaksi</h2>
+    <form id="filter" class="filter">
+      <select id="f-jenis" aria-label="Jenis">
+        <option value="">Semua jenis</option>
+        <option value="masuk">Pemasukan</option>
+        <option value="keluar">Pengeluaran</option>
+        <option value="transfer">Isi ulang</option>
+      </select>
+      <input id="f-dari" type="date" aria-label="Dari tanggal">
+      <input id="f-sampai" type="date" aria-label="Sampai tanggal">
+    </form>
+    <div class="tabel-wrap">
+      <table>
+        <thead><tr><th>Tanggal</th><th>Kategori</th><th>Kas</th><th class="kanan">Nominal</th></tr></thead>
+        <tbody id="isi-tabel"></tbody>
+      </table>
+    </div>
+    <p id="kosong" class="redup" hidden>Belum ada transaksi.</p>
+    <div class="halaman">
+      <button id="prev" class="sekunder">‹ Sebelumnya</button>
+      <span id="info-halaman" class="redup"></span>
+      <button id="next" class="sekunder">Berikutnya ›</button>
+    </div>
+  </section>
+</main>
+
+<div id="toast" role="status" aria-live="polite" hidden></div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/transaksi.js') }}"></script>{% endblock %}

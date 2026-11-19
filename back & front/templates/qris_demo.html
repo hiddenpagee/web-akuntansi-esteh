@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}QRIS Demo{% endblock %}
+{% block body %}
+<main class="hp-demo">
+  <header class="hp-atas">
+    <img class="logo" src="{{ url_for('static', filename='img/logo-64.png') }}" alt="" width="32" height="32">
+    <div>
+      <strong>Es Teh Manis Ceria</strong>
+      <small>QRIS DEMO · bukan uang sungguhan</small>
+    </div>
+  </header>
+
+  <section class="kartu qr-toko">
+    <div id="qr-toko" role="img" aria-label="Kode QR toko (contoh)"></div>
+    <small class="redup">Scan untuk membayar. Ini hanya gambar contoh, isi nominal di bawah.</small>
+  </section>
+
+  <section class="kartu">
+    <form id="form-bayar" novalidate>
+      <label for="nama-pembeli">Nama pembeli <span class="redup">(opsional)</span></label>
+      <input id="nama-pembeli" type="text" maxlength="40" placeholder="Pembeli Demo" autocomplete="off">
+
+      <label for="nominal-bayar">Nominal</label>
+      <div class="input-rupiah">
+        <span>Rp</span>
+        <input id="nominal-bayar" type="text" inputmode="numeric" autocomplete="off" placeholder="0" maxlength="11">
+      </div>
+
+      <div id="pesan-bayar" class="alert" role="alert" hidden></div>
+      <button id="btn-bayar" type="submit" class="utama">Bayar</button>
+    </form>
+  </section>
+
+  <section id="struk" class="kartu struk" hidden aria-live="polite">
+    <h2>Pembayaran berhasil</h2>
+    <p class="struk-nominal" id="struk-nominal"></p>
+    <dl>
+      <dt>Waktu</dt><dd id="struk-waktu"></dd>
+      <dt>Referensi</dt><dd id="struk-ref"></dd>
+      <dt>Status</dt><dd id="struk-status"></dd>
+    </dl>
+    <p class="redup">Dicatat otomatis ke <b>Kas di Bank</b>. Buka halaman Transaksi di web kas untuk melihatnya muncul sendiri.</p>
+    <a href="/transaksi" target="_blank" rel="noopener">Buka Transaksi</a>
+  </section>
+
+  <section class="kartu" id="kotak-riwayat-demo" hidden>
+    <h2>Pembayaran di sesi ini</h2>
+    <ul id="riwayat-demo" class="daftar-demo"></ul>
+  </section>
+</main>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/qris_demo.js') }}"></script>
+{% endblock %}

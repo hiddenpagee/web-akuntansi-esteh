@@ -1,0 +1,26 @@
+<header class="topbar">
+  <div class="topbar-kiri">
+    <a href="/dashboard" class="brand"><img class="logo" src="{{ url_for('static', filename='img/logo-64.png') }}" alt="" width="32" height="32"><strong>Kas Es Teh</strong></a>
+    <nav class="nav-menu" aria-label="Navigasi Utama">
+      <a href="/dashboard" {% if page == 'dashboard' %}aria-current="page"{% endif %}>Beranda</a>
+      <a href="/transaksi" {% if page == 'transaksi' %}aria-current="page"{% endif %}>Transaksi</a>
+      {% if role == 'pemilik' %}
+      <a href="/jurnal-umum" {% if page == 'jurnal_umum' %}aria-current="page"{% endif %}>Jurnal Umum</a>
+      {% endif %}
+      {% if role in ('pemilik', 'kasir') %}
+      <a href="/jurnal-petty-cash" {% if page == 'jurnal_petty_cash' %}aria-current="page"{% endif %}>Jurnal Petty Cash</a>
+      {% endif %}
+      {% if qris_demo and role in ('pemilik', 'kasir') %}
+      <a href="/qris-demo" target="_blank" rel="noopener">Simulator QRIS</a>
+      {% endif %}
+      <a href="/kas-kecil" {% if page == 'kas_kecil' %}aria-current="page"{% endif %}>Kas Kecil</a>
+      {% if role == 'pemilik' %}
+      <a href="/laporan" {% if page == 'laporan' %}aria-current="page"{% endif %}>Laporan</a>
+      {% endif %}
+    </nav>
+  </div>
+  <div class="user">
+    <span class="user-info">{{ nama }} <small class="badge-role">({{ role }})</small></span>
+    <button id="btn-logout" class="sekunder btn-sm" type="button">Keluar</button>
+  </div>
+</header>

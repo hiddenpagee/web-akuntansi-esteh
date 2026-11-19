@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Kas Kecil{% endblock %}
+{% block body %}
+{% include "navbar.html" %}
+
+<main class="isi">
+  <!-- Saldo Kas Kecil -->
+  <section class="saldo-tunggal" aria-label="Saldo Kas Kecil">
+    <div class="kartu kartu-fokus">
+      <div class="baris-header-kartu">
+        <small>Saldo Kas Kecil Saat Ini</small>
+        <span id="badge-status" class="badge-status">Memuat…</span>
+      </div>
+      <b id="saldo-kecil" class="nominal-besar">…</b>
+      <div id="banner-menipis" class="alert-inline bahaya-teks" hidden>
+        ⚠️ <strong>Saldo Menipis!</strong> Saldo Kas Kecil di bawah batas minimum Rp100.000. Segera lakukan isi ulang.
+      </div>
+      <small class="redup">Batas aman minimum operasional: <strong>Rp100.000</strong></small>
+    </div>
+  </section>
+
+  <!-- Form Isi Ulang (Khusus Pemilik) -->
+  {% if role == 'pemilik' %}
+  <section class="kartu" id="kotak-isi-ulang">
+    <h2>🔄 Isi Ulang Kas Kecil</h2>
+    <p class="redup ringkas-teks">Dana dipindahkan dari Kas di Tangan atau Kas di Bank ke Kas Kecil untuk keperluan operasional harian. Nominal bebas, sesuai kebutuhan.</p>
+    <div id="pesan-isi-ulang" class="alert" role="alert" hidden></div>
+    <form id="form-isi-ulang" novalidate>
+      <div class="grid">
+        <div class="penuh">
+          <label for="sumber-isi-ulang">Diambil dari</label>
+          <select id="sumber-isi-ulang">
+            <option value="tangan">Kas di Tangan</option>
+            <option value="bank">Kas di Bank</option>
+          </select>
+        </div>
+        <div class="penuh">
+          <label for="nominal-isi-ulang">Nominal Isi Ulang (Rp)</label>
+          <input id="nominal-isi-ulang" type="text" inputmode="numeric" autocomplete="off" placeholder="300.000" required>
+          <div class="chips" aria-label="Pilihan Cepat Nominal">
+            <button type="button" class="chip" data-nominal="100000">+100 rb</button>
+            <button type="button" class="chip" data-nominal="200000">+200 rb</button>
+            <button type="button" class="chip" data-nominal="300000">+300 rb</button>
+            <button type="button" class="chip" data-nominal="500000">+500 rb</button>
+          </div>
+        </div>
+        <div class="penuh">
+          <label for="keterangan-isi-ulang">Keterangan <small class="redup">(opsional)</small></label>
+          <input id="keterangan-isi-ulang" type="text" maxlength="200" placeholder="Isi ulang kas kecil mingguan">
+        </div>
+      </div>
+      <button id="btn-isi-ulang" type="submit" class="utama">Transfer ke Kas Kecil</button>
+    </form>
+  </section>
+  {% else %}
+  <section class="kartu kartu-info">
+    <div class="info-hak-akses">
+      <span>ℹ️</span>
+      <p>Isi ulang kas kecil hanya dapat diproses oleh akun <strong>Pemilik</strong> melalui transfer dari Kas di Tangan atau Kas di Bank.</p>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Riwayat Mutasi Kas Kecil -->
+  <section class="kartu">
+    <div class="baris-header-kartu">
+      <h2>Riwayat Mutasi Kas Kecil</h2>
+      <small class="redup">Maksimal 50 mutasi terakhir</small>
+    </div>
+    <div class="tabel-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Keterangan / Kategori</th>
+            <th>Tipe</th>
+            <th class="kanan">Nominal</th>
+          </tr>
+        </thead>
+        <tbody id="isi-mutasi-kecil"></tbody>
+      </table>
+    </div>
+    <p id="kosong-mutasi" class="redup" hidden>Belum ada catatan mutasi kas kecil.</p>
+  </section>
+</main>
+
+<div id="toast" role="status" aria-live="polite" hidden></div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/kas_kecil.js') }}"></script>
+{% endblock %}

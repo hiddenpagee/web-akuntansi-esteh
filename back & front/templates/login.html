@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block body %}
+<main class="login">
+  <form id="form-login" class="kartu" novalidate>
+    <h1 class="judul-login"><img class="logo-login" src="{{ url_for('static', filename='img/logo-128.png') }}" alt="" width="56" height="56"> Kas Es Teh</h1>
+    <p class="redup">Masuk untuk mencatat kas dan kas kecil.</p>
+
+    <div id="pesan" class="alert" role="alert" hidden></div>
+
+    <fieldset class="segmen kategori-login" id="grup-kategori">
+      <legend>Masuk sebagai</legend>
+      <label><input type="radio" name="kategori" value="pemilik"><span>Pemilik</span></label>
+      <label><input type="radio" name="kategori" value="kasir"><span>Kasir</span></label>
+      <label><input type="radio" name="kategori" value="karyawan"><span>Karyawan</span></label>
+    </fieldset>
+
+    <label for="email">Email</label>
+    <input id="email" type="email" autocomplete="username" inputmode="email" required autofocus>
+
+    <label for="password">Password</label>
+    <div class="baris-input">
+      <input id="password" type="password" autocomplete="current-password" required>
+      <button type="button" id="lihat" class="sekunder" aria-pressed="false">Lihat</button>
+    </div>
+
+    <button id="btn-masuk" type="submit" class="utama">Masuk</button>
+  </form>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/login.js') }}"></script>{% endblock %}

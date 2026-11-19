@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Laporan Keuangan{% endblock %}
+{% block body %}
+{% include "navbar.html" %}
+
+<main class="isi">
+  <!-- Filter Periode Laporan -->
+  <section class="kartu">
+    <div class="baris-header-kartu">
+      <h2>Laporan Keuangan & Buku Kas</h2>
+      <button id="btn-export" type="button" class="sekunder btn-export">
+        📥 Unduh Excel (.xlsx)
+      </button>
+    </div>
+
+    <form id="form-laporan" class="filter-laporan" novalidate>
+      <div class="baris-filter">
+        <div>
+          <label for="pilih-periode">Periode</label>
+          <select id="pilih-periode">
+            <option value="harian">Harian</option>
+            <option value="mingguan">Mingguan (Senin–Minggu)</option>
+            <option value="bulanan" selected>Bulanan</option>
+            <option value="custom">Rentang Tanggal (Custom)</option>
+          </select>
+        </div>
+
+        <div id="kotak-tanggal-acuan">
+          <label for="tgl-acuan">Tanggal Acuan</label>
+          <input id="tgl-acuan" type="date">
+        </div>
+
+        <div id="kotak-tanggal-custom-dari" hidden>
+          <label for="tgl-dari">Dari Tanggal</label>
+          <input id="tgl-dari" type="date">
+        </div>
+
+        <div id="kotak-tanggal-custom-sampai" hidden>
+          <label for="tgl-sampai">Sampai Tanggal</label>
+          <input id="tgl-sampai" type="date">
+        </div>
+
+        <div class="filter-submit-col">
+          <label class="sr">Tampilkan</label>
+          <button id="btn-filter-laporan" type="submit" class="utama">Tampilkan</button>
+        </div>
+      </div>
+    </form>
+    <div id="pesan-laporan" class="alert" role="alert" hidden></div>
+  </section>
+
+  <!-- Laba Rugi Sederhana -->
+  <section class="kartu">
+    <div class="baris-header-kartu">
+      <h2>Laba Rugi Sederhana</h2>
+      <small id="periode-label" class="redup"></small>
+    </div>
+    <div class="ringkasan-grid">
+      <div class="kartu-metrik masuk">
+        <small>Total Pemasukan</small>
+        <div id="lr-masuk" class="angka-metrik plus">…</div>
+      </div>
+      <div class="kartu-metrik keluar">
+        <small>Total Pengeluaran</small>
+        <div id="lr-keluar" class="angka-metrik minus">…</div>
+      </div>
+      <div class="kartu-metrik laba">
+        <small>Laba Bersih Usaha</small>
+        <div id="lr-laba" class="angka-metrik">…</div>
+      </div>
+    </div>
+    <p class="redup ringkas-teks catatan-lr">
+      <small>ℹ️ Catatan: Isi ulang Kas Kecil tidak dimasukkan ke dalam beban pengeluaran karena merupakan pemindahan saldo internal.</small>
+    </p>
+  </section>
+
+  <!-- Rekap Kategori -->
+  <section class="kartu">
+    <h2>Rekap per Kategori</h2>
+    <div class="rekap-grid">
+      <div class="rekap-kolom">
+        <h3>Pemasukan</h3>
+        <div class="tabel-wrap">
+          <table>
+            <thead>
+              <tr><th>Kategori</th><th class="kanan">Total</th></tr>
+            </thead>
+            <tbody id="isi-rekap-masuk"></tbody>
+          </table>
+        </div>
+        <p id="kosong-rekap-masuk" class="redup" hidden>Tidak ada pemasukan.</p>
+      </div>
+
+      <div class="rekap-kolom">
+        <h3>Pengeluaran</h3>
+        <div class="tabel-wrap">
+          <table>
+            <thead>
+              <tr><th>Kategori</th><th class="kanan">Total</th></tr>
+            </thead>
+            <tbody id="isi-rekap-keluar"></tbody>
+          </table>
+        </div>
+        <p id="kosong-rekap-keluar" class="redup" hidden>Tidak ada pengeluaran.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Buku Kas Terinci -->
+  <section class="kartu">
+    <div class="baris-header-kartu">
+      <h2>Buku Kas Terinci</h2>
+      <div class="saldo-buku-info">
+        <span>Saldo Awal: <strong id="buku-saldo-awal">…</strong></span>
+        <span>Saldo Akhir: <strong id="buku-saldo-akhir">…</strong></span>
+      </div>
+    </div>
+    <div class="tabel-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Keterangan</th>
+            <th>Kategori</th>
+            <th>Kas</th>
+            <th>Metode</th>
+            <th class="kanan">Debit</th>
+            <th class="kanan">Kredit</th>
+            <th class="kanan">Saldo</th>
+          </tr>
+        </thead>
+        <tbody id="isi-buku-kas"></tbody>
+      </table>
+    </div>
+    <p id="kosong-buku" class="redup" hidden>Tidak ada transaksi pada rentang periode ini.</p>
+  </section>
+</main>
+
+<div id="toast" role="status" aria-live="polite" hidden></div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/laporan.js') }}"></script>
+{% endblock %}

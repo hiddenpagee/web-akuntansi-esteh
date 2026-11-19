@@ -109,3 +109,10 @@ Akses aplikasi di browser pada: `http://localhost:5000`
 - **Jurnal Umum** (`/jurnal-umum`, pemilik) dan **Jurnal Petty Cash** (`/jurnal-petty-cash`, pemilik dan kasir) tersusun otomatis dari transaksi, jadi selalu cocok dengan pencatatan. Akun lawan tiap kategori ada di kolom `kategori.akun_kode` (bagan akun di `jurnal.py`).
 - Database yang sudah berjalan: jalankan `db/03_hapus_pembatalan.sql`, lalu `db/04_pisah_kas_jurnal.sql`.
 
+
+## QRIS otomatis (revisi 19 Nov 2026)
+
+- `POST /api/qris/webhook` menerima notifikasi pembayaran bertanda tangan (HMAC), mencegah dobel, dan mencatat pemasukan QRIS ke Kas di Bank. Rinciannya di `docs/qris_webhook.md`.
+- Simulator pembeli: `/qris-demo` (aktif hanya jika `QRIS_SIMULATOR=1`). Nominal diketik sendiri, titik ribuan muncul otomatis.
+- Beranda dan Transaksi memuat ulang tiap 5 detik; transaksi otomatis berlabel "Otomatis".
+- Persiapan: jalankan `db/05_qris_otomatis.sql`, lalu `db/buat_akun_sistem_qris.py`, tempel keluarannya ke `.env`.

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Jurnal Petty Cash{% endblock %}
+{% block body %}
+{% include "navbar.html" %}
+
+<main class="isi">
+  <section class="kartu">
+    <div class="baris-header-kartu">
+      <h2>Jurnal Petty Cash</h2>
+      <small id="periode-label" class="redup"></small>
+    </div>
+    <p class="redup ringkas-teks">Mutasi Kas Kecil: isi ulang (debit) dan pengeluaran kecil (kredit), tersusun otomatis dari transaksi.</p>
+    <form id="form-jurnal" class="filter-laporan" novalidate>
+      <div class="baris-filter">
+        <div>
+          <label for="pilih-periode">Periode</label>
+          <select id="pilih-periode">
+            <option value="harian">Harian</option>
+            <option value="mingguan">Mingguan (Senin–Minggu)</option>
+            <option value="bulanan" selected>Bulanan</option>
+            <option value="custom">Rentang Tanggal (Custom)</option>
+          </select>
+        </div>
+        <div id="kotak-tanggal-acuan">
+          <label for="tgl-acuan">Tanggal Acuan</label>
+          <input id="tgl-acuan" type="date">
+        </div>
+        <div id="kotak-tanggal-custom-dari" hidden>
+          <label for="tgl-dari">Dari Tanggal</label>
+          <input id="tgl-dari" type="date">
+        </div>
+        <div id="kotak-tanggal-custom-sampai" hidden>
+          <label for="tgl-sampai">Sampai Tanggal</label>
+          <input id="tgl-sampai" type="date">
+        </div>
+        <div class="filter-submit-col">
+          <label class="sr">Tampilkan</label>
+          <button id="btn-filter-jurnal" type="submit" class="utama">Tampilkan</button>
+        </div>
+      </div>
+    </form>
+    <div id="pesan-jurnal" class="alert" role="alert" hidden></div>
+  </section>
+
+  <section class="saldo" aria-label="Ringkasan Kas Kecil">
+    <div class="kartu"><small>Saldo awal</small><b id="pc-awal">…</b></div>
+    <div class="kartu"><small>Total isi ulang</small><b id="pc-isi">…</b></div>
+    <div class="kartu"><small>Total pengeluaran</small><b id="pc-keluar">…</b></div>
+    <div class="kartu"><small>Saldo akhir</small><b id="pc-akhir">…</b></div>
+  </section>
+
+  <section class="kartu">
+    <h2>Buku Petty Cash</h2>
+    <div class="tabel-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Tanggal</th><th>No.</th><th>Keterangan</th><th>Akun lawan</th>
+            <th class="kanan">Debit</th><th class="kanan">Kredit</th><th class="kanan">Saldo</th>
+          </tr>
+        </thead>
+        <tbody id="isi-petty"></tbody>
+      </table>
+    </div>
+    <p id="kosong-petty" class="redup" hidden>Belum ada mutasi Kas Kecil pada periode ini.</p>
+  </section>
+</main>
+
+<div id="toast" role="status" aria-live="polite" hidden></div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/jurnal.js') }}"></script>
+{% endblock %}
