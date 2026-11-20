@@ -33,7 +33,7 @@ def create_app(test_config: dict | None = None) -> Flask:
     from pathlib import Path
     load_dotenv(Path(__file__).parent / ".env")
     load_dotenv()
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder="pulic/static")
     app.config.update(
         SECRET_KEY=os.environ.get("FLASK_SECRET_KEY"),
         SESSION_COOKIE_HTTPONLY=True,
