@@ -77,7 +77,7 @@ def create_app(test_config: dict | None = None) -> Flask:
             resp.headers["Cache-Control"] = "no-store"
         resp.headers["X-Content-Type-Options"] = "nosniff"
         resp.headers["X-Frame-Options"] = "DENY"
-        resp.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none'"
+        resp.headers["Content-Security-Policy"] = "default-src 'self'; img-src 'self' blob:; frame-ancestors 'none'"
         return resp
 
     @app.get("/api/health")

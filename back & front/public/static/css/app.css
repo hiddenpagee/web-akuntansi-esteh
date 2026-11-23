@@ -216,3 +216,13 @@ gap:.15rem .75rem;padding:.7rem .15rem;border-bottom:1px solid var(--garis)}
 .struk dl{display:grid;grid-template-columns:auto 1fr;gap:.25rem .75rem;margin:0 0 .75rem}
 .struk dt{color:var(--redup)}.struk dd{margin:0;word-break:break-all}
 .daftar-demo{margin:0;padding-left:1.1rem;font-size:.88rem}
+
+/* qris demo (tab, QR, panel) */
+.qr-info{font-size:.85rem;margin-top:.35rem}.qr-hint{margin:.25rem 0 0}
+.qr-tautan{font-size:.82rem;word-break:break-all}
+.label-jarak{margin-top:.75rem}.tebal{font-weight:600}
+.teks-kecil{font-size:.88rem}.teks-panduan{font-size:.9rem;line-height:1.6}
+.kotak-upload{margin:1rem 0}.foto-qris{text-align:center;margin:.75rem 0}
+.foto-qris img{max-width:220px;border-radius:8px;border:1px solid var(--garis)}
+#qr-toko canvas,#qr-toko img{max-width:100%;height:auto}
+#tab-mode span{padding:.55rem .25rem;font-size:.85rem}

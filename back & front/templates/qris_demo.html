@@ -21,10 +21,10 @@
   <div id="panel-simulator">
     <section class="kartu qr-toko">
       <div id="qr-toko" role="img" aria-label="Kode QR toko"></div>
-      <div style="font-size:.85rem; margin-top:.35rem">
+      <div class="qr-info">
         <strong>Scan QR dengan Kamera HP</strong>
-        <p class="redup" style="margin:.25rem 0 0">HP & laptop tersambung di Wi-Fi yang sama untuk buka di HP:</p>
-        <a id="tautan-hp" href="{{ url_hp }}" target="_blank" rel="noopener" style="font-size:.82rem; word-break:break-all">{{ url_hp }}</a>
+        <p class="redup qr-hint">Scan QR ini, atau buka tautan berikut di HP (kalau dites lokal, HP dan laptop harus satu Wi-Fi):</p>
+        <a id="tautan-hp" href="{{ url_hp }}" target="_blank" rel="noopener" class="qr-tautan">{{ url_hp }}</a>
       </div>
     </section>
 
@@ -38,7 +38,7 @@
           <button type="button" class="chip" data-nominal="50000">Rp 50.000</button>
         </div>
 
-        <label for="nama-pembeli" style="margin-top:.75rem">Nama pembeli <span class="redup">(opsional)</span></label>
+        <label for="nama-pembeli" class="label-jarak">Nama pembeli <span class="redup">(opsional)</span></label>
         <input id="nama-pembeli" type="text" maxlength="40" placeholder="Pembeli Demo" autocomplete="off">
 
         <label for="nominal-bayar">Nominal</label>
@@ -61,7 +61,7 @@
         <dt>Status</dt><dd id="struk-status"></dd>
       </dl>
       <p class="redup">Otomatis dicatat ke <b>Kas di Bank</b>. Buka tab Transaksi atau Beranda untuk melihat saldo bertambah langsung.</p>
-      <a href="/transaksi" target="_blank" rel="noopener" class="tautan" style="font-weight:600">Buka Halaman Transaksi ›</a>
+      <a href="/transaksi" target="_blank" rel="noopener" class="tautan tebal">Buka Halaman Transaksi ›</a>
     </section>
 
     <section class="kartu" id="kotak-riwayat-demo" hidden>
@@ -74,19 +74,19 @@
   <div id="panel-real" hidden>
     <section class="kartu">
       <h2>Gunakan QRIS Toko Asli Anda</h2>
-      <p style="font-size:.88rem; color:var(--redup)">
+      <p class="teks-kecil redup">
         Jika Anda sudah memiliki QRIS fisik/merchant resmi (BCA, Mandiri, GoPay, Dana Bisnis, ShopeePay), Anda bisa menampilkan foto QRIS asli Anda di sini agar pelanggan scan langsung lewat aplikasi e-wallet / m-Banking resmi mereka.
       </p>
 
-      <div style="margin:1rem 0">
+      <div class="kotak-upload">
         <label for="input-foto-qris">Upload Gambar QRIS Toko Asli (opsional):</label>
         <input type="file" id="input-foto-qris" accept="image/*">
       </div>
-      <div id="kotak-foto-qris" style="text-align:center; margin:.75rem 0;" hidden>
-        <img id="img-qris-toko" alt="QRIS Asli Toko" style="max-width:220px; border-radius:8px; border:1px solid var(--garis);">
+      <div id="kotak-foto-qris" class="foto-qris" hidden>
+        <img id="img-qris-toko" alt="QRIS Asli Toko">
       </div>
 
-      <div class="alert" style="font-size:.85rem">
+      <div class="alert teks-kecil">
         <strong>Alur Pencatatan Transaksi Nyata:</strong><br>
         1. Pelanggan scan QRIS asli toko Anda dengan m-Banking / E-wallet.<br>
         2. Uang nyata masuk ke rekening bank / e-wallet toko Anda.<br>
@@ -113,9 +113,9 @@
   <div id="panel-panduan" hidden>
     <section class="kartu">
       <h2>Panduan Transaksi QRIS</h2>
-      <div style="font-size:.9rem; line-height:1.6">
+      <div class="teks-panduan">
         <h3>1. Uji Coba dari Smartphone</h3>
-        <p>Buka halaman ini dari laptop. Arahkan kamera HP Anda ke QR code di tab <b>Simulator HP</b>. HP Anda akan otomatis mendeteksi URL dan membukanya di browser HP. Anda bisa mengetik nominal dan menekan "Bayar", lalu cek web akuntansi Anda — saldo Kas di Bank langsung bertambah secara otomatis!</p>
+        <p>Buka halaman ini dari laptop. Arahkan kamera HP Anda ke QR code di tab <b>Simulator HP</b>; HP akan membuka halaman ini di browser HP. Anda bisa mengetik nominal dan menekan "Bayar", lalu cek web akuntansi Anda — saldo Kas di Bank langsung bertambah secara otomatis!</p>
 
         <h3>2. Transaksi Nyata dengan QRIS Merchant Toko</h3>
         <p>Gunakan tab <b>QRIS Toko Asli</b> untuk menampilkan barcode QRIS fisik kedai Anda. Pelanggan mentransfer uang asli melalui BCA/GoPay/Dana Anda. Setelah uang masuk ke rekening, tekan tombol "Catat QRIS Masuk".</p>
@@ -124,7 +124,7 @@
         <p>Aplikasi ini sudah memiliki webhook siap pakai di <code>POST /api/qris/webhook</code>. Jika Anda mendaftar di Payment Gateway seperti Midtrans Snap atau Xendit:</p>
         <ul>
           <li>Set Webhook URL di dashboard Midtrans ke <code>https://domain-anda.com/api/qris/webhook</code>.</li>
-          <li>Set <code>QRIS_WEBHOOK_SECRET</code> di <code>.env</code> dengan Server Key Midtrans.</li>
+          <li>Set <code>QRIS_WEBHOOK_SECRET</code> di environment variable server (Vercel). Format pesan dan tanda tangan gateway berbeda-beda, jadi perlu satu adapter kecil yang memverifikasi tanda tangan resmi mereka (lihat <code>docs/qris_webhook.md</code>).</li>
           <li>Setiap ada pembayaran QRIS sukses, uang otomatis tercatat ke <b>Kas di Bank</b> tanpa perlu input manual sama sekali.</li>
         </ul>
       </div>
