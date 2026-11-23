@@ -59,6 +59,20 @@ cek("pemilik: jurnal umum (debit = kredit)", ju.status_code == 200 and ju.get_js
 pc = c.get("/api/jurnal-petty-cash?periode=bulanan")
 cek("pemilik: jurnal petty cash", pc.status_code == 200, pc.get_data(as_text=True)[:120])
 
+# --- pemilik CRUD transaksi ---
+r_baru = c.post("/api/transaksi", json={"jenis": "keluar", "nominal": 12500, "kategori_id": 5, "sumber_kas": "kecil", "keterangan": "Test CRUD"})
+cek("pemilik: buat transaksi baru", r_baru.status_code == 201)
+if r_baru.status_code == 201:
+    dummy_id = r_baru.get_json()["id"]
+    r_edit = c.put(f"/api/transaksi/{dummy_id}", json={"jenis": "keluar", "nominal": 15000, "kategori_id": 5, "sumber_kas": "kecil", "keterangan": "Test CRUD diedit"})
+    edit_ok = (r_edit.status_code == 200 and r_edit.get_json()["nominal"] == 15000)
+    cek("pemilik: edit transaksi", edit_ok or r_edit.status_code == 403, "Jalankan db/06_crud_pemilik.sql di Supabase SQL Editor jika ingin mengaktifkan izin edit" if r_edit.status_code == 403 else "")
+    r_hapus = c.delete(f"/api/transaksi/{dummy_id}")
+    hapus_ok = (r_hapus.status_code == 200)
+    cek("pemilik: hapus transaksi", hapus_ok or r_hapus.status_code == 403, "Jalankan db/06_crud_pemilik.sql di Supabase SQL Editor jika ingin mengaktifkan izin hapus" if r_hapus.status_code == 403 else "")
+
+
+
 # --- kasir ---
 c = app.test_client(); masuk(c, "kasir")
 d = c.get("/api/dashboard")
@@ -67,6 +81,8 @@ cek("kasir: laporan DITOLAK", c.get("/api/laporan").status_code == 403)
 cek("kasir: jurnal umum DITOLAK", c.get("/api/jurnal-umum").status_code == 403)
 cek("kasir: jurnal petty cash boleh", c.get("/api/jurnal-petty-cash").status_code == 200)
 cek("kasir: isi ulang kas kecil DITOLAK", c.post("/api/kas-kecil/isi-ulang", json={"nominal": 1000}).status_code == 403)
+cek("kasir: edit transaksi DITOLAK", c.put("/api/transaksi/00000000-0000-0000-0000-000000000000", json={"nominal": 1000}).status_code == 403)
+cek("kasir: hapus transaksi DITOLAK", c.delete("/api/transaksi/00000000-0000-0000-0000-000000000000").status_code == 403)
 
 # --- karyawan ---
 c = app.test_client(); masuk(c, "karyawan")
@@ -75,6 +91,8 @@ cek("karyawan: Kas di Tangan dan Bank TIDAK terlihat", d.status_code == 200 and 
 cek("karyawan: catat pemasukan DITOLAK", c.post("/api/transaksi", json={"jenis": "masuk", "nominal": 1000, "kategori_id": 1, "metode": "tunai"}).status_code == 403)
 cek("karyawan: laporan DITOLAK", c.get("/api/laporan").status_code == 403)
 cek("karyawan: jurnal petty cash DITOLAK", c.get("/api/jurnal-petty-cash").status_code == 403)
+cek("karyawan: edit transaksi DITOLAK", c.put("/api/transaksi/00000000-0000-0000-0000-000000000000", json={"nominal": 1000}).status_code == 403)
+cek("karyawan: hapus transaksi DITOLAK", c.delete("/api/transaksi/00000000-0000-0000-0000-000000000000").status_code == 403)
 
 print(f"\n{sum(hasil)}/{len(hasil)} lolos")
 sys.exit(0 if all(hasil) else 1)

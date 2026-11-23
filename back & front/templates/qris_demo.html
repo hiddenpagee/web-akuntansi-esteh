@@ -1,55 +1,139 @@
 {% extends "base.html" %}
-{% block title %}QRIS Demo{% endblock %}
+{% block title %}QRIS Demo & Real Test{% endblock %}
 {% block body %}
 <main class="hp-demo">
   <header class="hp-atas">
     <img class="logo" src="{{ url_for('static', filename='img/logo-64.png') }}" alt="" width="32" height="32">
     <div>
       <strong>Es Teh Manis Ceria</strong>
-      <small>QRIS DEMO · bukan uang sungguhan</small>
+      <small>Uji Coba QRIS & Simulator Pembayaran</small>
     </div>
   </header>
 
-  <section class="kartu qr-toko">
-    <div id="qr-toko" role="img" aria-label="Kode QR toko (contoh)"></div>
-    <small class="redup">Scan untuk membayar. Ini hanya gambar contoh, isi nominal di bawah.</small>
-  </section>
+  <fieldset class="segmen" id="tab-mode">
+    <legend class="sr">Mode QRIS</legend>
+    <label><input type="radio" name="mode-qris" value="simulator" checked><span>📱 Simulator HP</span></label>
+    <label><input type="radio" name="mode-qris" value="real"><span>🏪 QRIS Toko Asli</span></label>
+    <label><input type="radio" name="mode-qris" value="panduan"><span>📖 Panduan</span></label>
+  </fieldset>
 
-  <section class="kartu">
-    <form id="form-bayar" novalidate>
-      <label for="nama-pembeli">Nama pembeli <span class="redup">(opsional)</span></label>
-      <input id="nama-pembeli" type="text" maxlength="40" placeholder="Pembeli Demo" autocomplete="off">
+  <!-- Bagian 1: Simulator HP dengan Real QR Code -->
+  <div id="panel-simulator">
+    <section class="kartu qr-toko">
+      <div id="qr-toko" role="img" aria-label="Kode QR toko"></div>
+      <div style="font-size:.85rem; margin-top:.35rem">
+        <strong>Scan QR dengan Kamera HP</strong>
+        <p class="redup" style="margin:.25rem 0 0">HP & laptop tersambung di Wi-Fi yang sama untuk buka di HP:</p>
+        <a id="tautan-hp" href="{{ url_hp }}" target="_blank" rel="noopener" style="font-size:.82rem; word-break:break-all">{{ url_hp }}</a>
+      </div>
+    </section>
 
-      <label for="nominal-bayar">Nominal</label>
-      <div class="input-rupiah">
-        <span>Rp</span>
-        <input id="nominal-bayar" type="text" inputmode="numeric" autocomplete="off" placeholder="0" maxlength="11">
+    <section class="kartu">
+      <form id="form-bayar" novalidate>
+        <label>Pilihan Cepat Nominal</label>
+        <div class="chips" id="chips-nominal">
+          <button type="button" class="chip" data-nominal="10000">Rp 10.000</button>
+          <button type="button" class="chip" data-nominal="15000">Rp 15.000</button>
+          <button type="button" class="chip" data-nominal="25000">Rp 25.000</button>
+          <button type="button" class="chip" data-nominal="50000">Rp 50.000</button>
+        </div>
+
+        <label for="nama-pembeli" style="margin-top:.75rem">Nama pembeli <span class="redup">(opsional)</span></label>
+        <input id="nama-pembeli" type="text" maxlength="40" placeholder="Pembeli Demo" autocomplete="off">
+
+        <label for="nominal-bayar">Nominal</label>
+        <div class="input-rupiah">
+          <span>Rp</span>
+          <input id="nominal-bayar" type="text" inputmode="numeric" autocomplete="off" placeholder="0" maxlength="11">
+        </div>
+
+        <div id="pesan-bayar" class="alert" role="alert" hidden></div>
+        <button id="btn-bayar" type="submit" class="utama">Bayar Sekarang</button>
+      </form>
+    </section>
+
+    <section id="struk" class="kartu struk" hidden aria-live="polite">
+      <h2>Pembayaran Berhasil ✓</h2>
+      <p class="struk-nominal" id="struk-nominal"></p>
+      <dl>
+        <dt>Waktu</dt><dd id="struk-waktu"></dd>
+        <dt>Referensi</dt><dd id="struk-ref"></dd>
+        <dt>Status</dt><dd id="struk-status"></dd>
+      </dl>
+      <p class="redup">Otomatis dicatat ke <b>Kas di Bank</b>. Buka tab Transaksi atau Beranda untuk melihat saldo bertambah langsung.</p>
+      <a href="/transaksi" target="_blank" rel="noopener" class="tautan" style="font-weight:600">Buka Halaman Transaksi ›</a>
+    </section>
+
+    <section class="kartu" id="kotak-riwayat-demo" hidden>
+      <h2>Pembayaran di Sesi Ini</h2>
+      <ul id="riwayat-demo" class="daftar-demo"></ul>
+    </section>
+  </div>
+
+  <!-- Bagian 2: Mode Transaksi Nyata dengan QRIS Fisik Toko -->
+  <div id="panel-real" hidden>
+    <section class="kartu">
+      <h2>Gunakan QRIS Toko Asli Anda</h2>
+      <p style="font-size:.88rem; color:var(--redup)">
+        Jika Anda sudah memiliki QRIS fisik/merchant resmi (BCA, Mandiri, GoPay, Dana Bisnis, ShopeePay), Anda bisa menampilkan foto QRIS asli Anda di sini agar pelanggan scan langsung lewat aplikasi e-wallet / m-Banking resmi mereka.
+      </p>
+
+      <div style="margin:1rem 0">
+        <label for="input-foto-qris">Upload Gambar QRIS Toko Asli (opsional):</label>
+        <input type="file" id="input-foto-qris" accept="image/*">
+      </div>
+      <div id="kotak-foto-qris" style="text-align:center; margin:.75rem 0;" hidden>
+        <img id="img-qris-toko" alt="QRIS Asli Toko" style="max-width:220px; border-radius:8px; border:1px solid var(--garis);">
       </div>
 
-      <div id="pesan-bayar" class="alert" role="alert" hidden></div>
-      <button id="btn-bayar" type="submit" class="utama">Bayar</button>
-    </form>
-  </section>
+      <div class="alert" style="font-size:.85rem">
+        <strong>Alur Pencatatan Transaksi Nyata:</strong><br>
+        1. Pelanggan scan QRIS asli toko Anda dengan m-Banking / E-wallet.<br>
+        2. Uang nyata masuk ke rekening bank / e-wallet toko Anda.<br>
+        3. Cek mutasi masuk di HP toko, lalu masukkan nominal di bawah dan klik <b>Catat QRIS Masuk</b> untuk membukukan ke Kas di Bank!
+      </div>
 
-  <section id="struk" class="kartu struk" hidden aria-live="polite">
-    <h2>Pembayaran berhasil</h2>
-    <p class="struk-nominal" id="struk-nominal"></p>
-    <dl>
-      <dt>Waktu</dt><dd id="struk-waktu"></dd>
-      <dt>Referensi</dt><dd id="struk-ref"></dd>
-      <dt>Status</dt><dd id="struk-status"></dd>
-    </dl>
-    <p class="redup">Dicatat otomatis ke <b>Kas di Bank</b>. Buka halaman Transaksi di web kas untuk melihatnya muncul sendiri.</p>
-    <a href="/transaksi" target="_blank" rel="noopener">Buka Transaksi</a>
-  </section>
+      <form id="form-real-qris" novalidate>
+        <label for="real-nama-pembeli">Nama Pembeli <span class="redup">(opsional)</span></label>
+        <input id="real-nama-pembeli" type="text" maxlength="40" placeholder="mis. Pelanggan GoPay" autocomplete="off">
 
-  <section class="kartu" id="kotak-riwayat-demo" hidden>
-    <h2>Pembayaran di sesi ini</h2>
-    <ul id="riwayat-demo" class="daftar-demo"></ul>
-  </section>
+        <label for="real-nominal-bayar">Nominal Diterima</label>
+        <div class="input-rupiah">
+          <span>Rp</span>
+          <input id="real-nominal-bayar" type="text" inputmode="numeric" autocomplete="off" placeholder="0" maxlength="11" required>
+        </div>
+
+        <div id="pesan-real-bayar" class="alert" role="alert" hidden></div>
+        <button id="btn-real-bayar" type="submit" class="utama">Catat QRIS Masuk ke Kas Bank</button>
+      </form>
+    </section>
+  </div>
+
+  <!-- Bagian 3: Panduan & Gateway Otomatis -->
+  <div id="panel-panduan" hidden>
+    <section class="kartu">
+      <h2>Panduan Transaksi QRIS</h2>
+      <div style="font-size:.9rem; line-height:1.6">
+        <h3>1. Uji Coba dari Smartphone</h3>
+        <p>Buka halaman ini dari laptop. Arahkan kamera HP Anda ke QR code di tab <b>Simulator HP</b>. HP Anda akan otomatis mendeteksi URL dan membukanya di browser HP. Anda bisa mengetik nominal dan menekan "Bayar", lalu cek web akuntansi Anda — saldo Kas di Bank langsung bertambah secara otomatis!</p>
+
+        <h3>2. Transaksi Nyata dengan QRIS Merchant Toko</h3>
+        <p>Gunakan tab <b>QRIS Toko Asli</b> untuk menampilkan barcode QRIS fisik kedai Anda. Pelanggan mentransfer uang asli melalui BCA/GoPay/Dana Anda. Setelah uang masuk ke rekening, tekan tombol "Catat QRIS Masuk".</p>
+
+        <h3>3. Integrasi Payment Gateway Otomatis (Midtrans / Xendit)</h3>
+        <p>Aplikasi ini sudah memiliki webhook siap pakai di <code>POST /api/qris/webhook</code>. Jika Anda mendaftar di Payment Gateway seperti Midtrans Snap atau Xendit:</p>
+        <ul>
+          <li>Set Webhook URL di dashboard Midtrans ke <code>https://domain-anda.com/api/qris/webhook</code>.</li>
+          <li>Set <code>QRIS_WEBHOOK_SECRET</code> di <code>.env</code> dengan Server Key Midtrans.</li>
+          <li>Setiap ada pembayaran QRIS sukses, uang otomatis tercatat ke <b>Kas di Bank</b> tanpa perlu input manual sama sekali.</li>
+        </ul>
+      </div>
+    </section>
+  </div>
 </main>
 <div id="toast" role="status" aria-live="polite" hidden></div>
 {% endblock %}
 {% block scripts %}
+<script src="{{ url_for('static', filename='js/qrcode.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/qris_demo.js') }}"></script>
 {% endblock %}

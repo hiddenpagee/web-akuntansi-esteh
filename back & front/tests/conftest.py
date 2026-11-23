@@ -54,6 +54,10 @@ class FakeQuery:
         self.op, self.payload = "update", payload
         return self
 
+    def delete(self):
+        self.op, self.payload = "delete", None
+        return self
+
     def _cocok(self, r):
         ops = {"eq": lambda a, b: a == b, "gte": lambda a, b: a >= b,
                "lte": lambda a, b: a <= b, "lt": lambda a, b: a < b, "in": lambda a, b: a in b}
@@ -69,6 +73,11 @@ class FakeQuery:
             rows.append(baru)
             return NS(data=[baru], count=None)
         cocok = [r for r in rows if self._cocok(r)]
+        if self.op == "delete":
+            for r in cocok:
+                if r in rows:
+                    rows.remove(r)
+            return NS(data=[dict(r) for r in cocok], count=len(cocok))
         if self.op == "update":
             for r in cocok:
                 r.update(self.payload)

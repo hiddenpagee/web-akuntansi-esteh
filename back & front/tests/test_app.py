@@ -333,3 +333,54 @@ def test_akses_jurnal_per_role(client, db):
     login(client, "karyawan")
     assert client.get("/api/jurnal-umum").status_code == 403
     assert client.get("/api/jurnal-petty-cash").status_code == 403
+
+
+def test_pemilik_crud_transaksi(client, db):
+    login(client, "pemilik")
+    # Tambah transaksi awal
+    res_tambah = client.post("/api/transaksi", json={
+        "jenis": "keluar", "nominal": 25000, "kategori_id": 4, "sumber_kas": "kecil", "keterangan": "Beli cup"
+    })
+    assert res_tambah.status_code == 201
+    tid = res_tambah.get_json()["id"]
+
+    # Detail
+    res_det = client.get(f"/api/transaksi/{tid}")
+    assert res_det.status_code == 200
+    assert res_det.get_json()["nominal"] == 25000
+
+    # Ubah (PUT)
+    res_ubah = client.put(f"/api/transaksi/{tid}", json={
+        "jenis": "keluar", "nominal": 30000, "kategori_id": 4, "sumber_kas": "kecil", "keterangan": "Beli cup 2 pack"
+    })
+    assert res_ubah.status_code == 200
+    assert res_ubah.get_json()["nominal"] == 30000
+    assert res_ubah.get_json()["keterangan"] == "Beli cup 2 pack"
+
+    # Hapus (DELETE)
+    res_hapus = client.delete(f"/api/transaksi/{tid}")
+    assert res_hapus.status_code == 200
+    assert res_hapus.get_json()["status"] == "ok"
+
+    # Detail setelah hapus harus 404
+    assert client.get(f"/api/transaksi/{tid}").status_code == 404
+
+
+def test_non_pemilik_dilarang_edit_dan_hapus_transaksi(client, db):
+    login(client, "pemilik")
+    tid = client.post("/api/transaksi", json={
+        "jenis": "keluar", "nominal": 20000, "kategori_id": 4, "sumber_kas": "kecil", "keterangan": "Uji"
+    }).get_json()["id"]
+    client.post("/api/logout", json={})
+
+    # Kasir coba edit & hapus -> 403
+    login(client, "kasir")
+    assert client.put(f"/api/transaksi/{tid}", json={"nominal": 25000, "kategori_id": 4, "sumber_kas": "kecil"}).status_code == 403
+    assert client.delete(f"/api/transaksi/{tid}").status_code == 403
+    client.post("/api/logout", json={})
+
+    # Karyawan coba edit & hapus -> 403
+    login(client, "karyawan")
+    assert client.put(f"/api/transaksi/{tid}", json={"nominal": 25000, "kategori_id": 4, "sumber_kas": "kecil"}).status_code == 403
+    assert client.delete(f"/api/transaksi/{tid}").status_code == 403
+

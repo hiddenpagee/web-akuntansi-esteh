@@ -91,6 +91,81 @@ def validasi_transaksi(d: dict, role: str, hari: date) -> dict:
     }
 
 
+def validasi_transaksi_edit(d: dict, role: str, hari: date, lama: dict | None = None) -> dict:
+    if role != "pemilik":
+        raise supa.ValidasiError(403, "Hanya pemilik yang dapat mengubah riwayat transaksi")
+
+    lama = lama or {}
+    jenis = d.get("jenis") or lama.get("jenis")
+    if jenis not in JENIS:
+        raise supa.ValidasiError(400, "Jenis transaksi tidak valid")
+
+    nominal = angka_positif(d.get("nominal"))
+    if nominal is None:
+        raise supa.ValidasiError(400, "Nominal harus bilangan bulat lebih dari 0")
+
+    tanggal = parse_tanggal(d.get("tanggal"), hari)
+    if tanggal > hari:
+        raise supa.ValidasiError(400, "Tanggal tidak boleh di masa depan")
+
+    ket = d.get("keterangan")
+    if ket is not None:
+        if not isinstance(ket, str):
+            raise supa.ValidasiError(400, "Keterangan harus berupa teks")
+        ket = ket.strip() or None
+        if ket and len(ket) > 200:
+            raise supa.ValidasiError(400, "Keterangan maksimal 200 karakter")
+
+    if jenis == "transfer":
+        sumber = d.get("sumber_kas") or lama.get("sumber_kas") or "tangan"
+        if sumber not in ("tangan", "bank"):
+            raise supa.ValidasiError(400, "Sumber kas transfer harus tangan atau bank")
+        return {
+            "tanggal": tanggal.isoformat(),
+            "jenis": "transfer",
+            "nominal": nominal,
+            "sumber_kas": sumber,
+            "tujuan_kas": "kecil",
+            "kategori_id": None,
+            "metode": None,
+            "keterangan": ket or "Isi ulang kas kecil",
+        }
+
+    kid = d.get("kategori_id")
+    if kid is None:
+        kid = lama.get("kategori_id")
+    if isinstance(kid, bool) or not (isinstance(kid, int) or (isinstance(kid, str) and kid.isdigit())):
+        raise supa.ValidasiError(400, "Kategori wajib dipilih")
+    kid = int(kid)
+
+    metode = d.get("metode") or None
+    sumber = d.get("sumber_kas")
+
+    if jenis == "masuk":
+        if metode not in METODE:
+            raise supa.ValidasiError(400, "Metode pembayaran wajib: tunai atau qris")
+        tujuan = SUMBER_MASUK[metode]
+        if sumber not in (None, "", tujuan):
+            raise supa.ValidasiError(400, "Pemasukan tunai masuk ke Kas di Tangan, QRIS ke Kas di Bank")
+        sumber = tujuan
+    else:
+        if sumber not in KAS:
+            raise supa.ValidasiError(400, "Sumber kas wajib: tangan, bank, atau kecil")
+        if metode is not None and metode not in METODE:
+            raise supa.ValidasiError(400, "Metode harus tunai atau qris")
+
+    return {
+        "tanggal": tanggal.isoformat(),
+        "jenis": jenis,
+        "kategori_id": kid,
+        "nominal": nominal,
+        "metode": metode,
+        "sumber_kas": sumber,
+        "tujuan_kas": None,
+        "keterangan": ket,
+    }
+
+
 # ---------- endpoint ----------
 @bp.get("/dashboard")
 @login_required
@@ -164,6 +239,43 @@ def tambah_transaksi():
     payload["dibuat_oleh"] = session["user_id"]
     res = supa.user_client().table("transaksi").insert(payload).execute()
     return jsonify(res.data[0]), 201
+
+
+@bp.get("/transaksi/<id>")
+@login_required
+def detail_transaksi(id):
+    c = supa.user_client()
+    res = c.table("transaksi").select(KOLOM).eq("id", id).execute()
+    if not res.data:
+        raise supa.ValidasiError(404, "Transaksi tidak ditemukan")
+    return jsonify(res.data[0])
+
+
+@bp.put("/transaksi/<id>")
+@role_required("pemilik")
+def ubah_transaksi(id):
+    c = supa.user_client()
+    ada = c.table("transaksi").select("*").eq("id", id).execute().data
+    if not ada:
+        raise supa.ValidasiError(404, "Transaksi tidak ditemukan")
+    payload = validasi_transaksi_edit(request.get_json(silent=True) or {}, session["role"], supa.hari_ini(), lama=ada[0])
+    res = c.table("transaksi").update(payload).eq("id", id).execute()
+    if not res.data:
+        raise supa.ValidasiError(403, "Gagal mengubah transaksi. Pastikan file db/06_crud_pemilik.sql sudah dijalankan di Supabase SQL Editor.")
+    return jsonify(res.data[0]), 200
+
+
+@bp.delete("/transaksi/<id>")
+@role_required("pemilik")
+def hapus_transaksi(id):
+    c = supa.user_client()
+    ada = c.table("transaksi").select("id").eq("id", id).execute().data
+    if not ada:
+        raise supa.ValidasiError(404, "Transaksi tidak ditemukan")
+    res = c.table("transaksi").delete().eq("id", id).execute()
+    if not res.data:
+        raise supa.ValidasiError(403, "Gagal menghapus transaksi. Pastikan file db/06_crud_pemilik.sql sudah dijalankan di Supabase SQL Editor.")
+    return jsonify(status="ok", id=id, pesan="Transaksi berhasil dihapus"), 200
 
 
 @bp.get("/kas-kecil")

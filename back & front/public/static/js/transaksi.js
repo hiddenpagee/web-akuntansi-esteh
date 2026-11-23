@@ -146,6 +146,20 @@ async function muatRiwayat() {
     const warna = t.jenis === "masuk" ? "plus" : t.jenis === "keluar" ? "minus" : "netral";
     tr.append(el("td", tanda + rupiah(t.nominal), "kanan " + warna));
 
+    if (ROLE === "pemilik") {
+      const tdAksi = el("td", null, "kanan aksi-kolom");
+      const btnEdit = el("button", "Edit", "sekunder btn-sm");
+      btnEdit.type = "button";
+      btnEdit.onclick = () => bukaModalEdit(t);
+
+      const btnHapus = el("button", "Hapus", "bahaya btn-sm");
+      btnHapus.type = "button";
+      btnHapus.onclick = () => bukaModalHapus(t);
+
+      tdAksi.append(btnEdit, btnHapus);
+      tr.append(tdAksi);
+    }
+
     tb.append(tr);
   });
 
@@ -159,6 +173,142 @@ async function muatRiwayat() {
 $("prev").addEventListener("click", () => { halaman--; muatRiwayat(); });
 $("next").addEventListener("click", () => { halaman++; muatRiwayat(); });
 $("filter").addEventListener("change", () => { halaman = 1; muatRiwayat().catch((e) => toast(e.message)); });
+
+// ---------- modal edit & hapus (khusus pemilik) ----------
+let idTransaksiHapus = null;
+
+function isiKategoriEdit(jenis, terpilihId) {
+  const sel = $("edit-kategori");
+  if (!sel) return;
+  sel.replaceChildren(new Option("— pilih kategori —", ""));
+  semuaKategori.filter((k) => k.jenis === jenis).forEach((k) => {
+    const opt = new Option(k.nama, k.id);
+    if (k.id === terpilihId) opt.selected = true;
+    sel.add(opt);
+  });
+}
+
+function aturFormEdit() {
+  const jenis = $("edit-jenis").value;
+  const masuk = jenis === "masuk";
+  const transfer = jenis === "transfer";
+
+  $("edit-kotak-kategori").hidden = transfer;
+  $("edit-kotak-sumber").hidden = masuk;
+  $("edit-kotak-metode").hidden = !masuk;
+  $("edit-info-kas-masuk").hidden = !masuk;
+
+  if (!transfer) {
+    isiKategoriEdit(jenis, Number($("edit-kategori").value));
+  }
+
+  const sumberSel = $("edit-sumber");
+  const optKecil = sumberSel.querySelector('option[value="kecil"]');
+  if (optKecil) optKecil.hidden = transfer;
+  if (transfer && sumberSel.value === "kecil") sumberSel.value = "tangan";
+}
+
+function bukaModalEdit(t) {
+  const modal = $("modal-edit");
+  if (!modal) return;
+  tampilPesan($("pesan-modal-edit"), "");
+  $("edit-id").value = t.id;
+  $("edit-tanggal").value = t.tanggal;
+  $("edit-jenis").value = t.jenis;
+  $("edit-nominal").value = Number(t.nominal).toLocaleString("id-ID");
+  aturFormEdit();
+  if (t.kategori_id) isiKategoriEdit(t.jenis, t.kategori_id);
+  if (t.sumber_kas) $("edit-sumber").value = t.sumber_kas;
+  if (t.metode) $("edit-metode").value = t.metode;
+  $("edit-keterangan").value = t.keterangan || "";
+  modal.showModal();
+}
+
+function bukaModalHapus(t) {
+  const modal = $("modal-hapus");
+  if (!modal) return;
+  idTransaksiHapus = t.id;
+  const namaKat = t.jenis === "transfer" ? "Isi ulang kas kecil" : (t.kategori?.nama || "-");
+  $("hapus-info").textContent = `${tglFormat(t.tanggal)} · ${namaKat} · ${rupiah(t.nominal)}`;
+  modal.showModal();
+}
+
+if (ROLE === "pemilik") {
+  const modalEdit = $("modal-edit");
+  const modalHapus = $("modal-hapus");
+
+  $("edit-jenis")?.addEventListener("change", aturFormEdit);
+
+  $("edit-nominal")?.addEventListener("input", (e) => {
+    const angka = e.target.value.replace(/\D/g, "").replace(/^0+/, "");
+    e.target.value = angka ? Number(angka).toLocaleString("id-ID") : "";
+  });
+
+  $("btn-batal-edit")?.addEventListener("click", () => modalEdit.close());
+  $("btn-batal-hapus")?.addEventListener("click", () => modalHapus.close());
+
+  $("form-edit")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const pesan = $("pesan-modal-edit");
+    tampilPesan(pesan, "");
+
+    const id = $("edit-id").value;
+    const jenis = $("edit-jenis").value;
+    const nominal = parseInt($("edit-nominal").value.replace(/\D/g, ""), 10);
+    const tanggal = $("edit-tanggal").value;
+    const kid = $("edit-kategori").value;
+    const sumber = $("edit-sumber").value;
+    const metode = $("edit-metode").value;
+    const ket = $("edit-keterangan").value.trim();
+
+    if (!nominal) return tampilPesan(pesan, "Nominal harus lebih dari 0");
+    if (!tanggal) return tampilPesan(pesan, "Tanggal wajib diisi");
+    if (jenis !== "transfer" && !kid) return tampilPesan(pesan, "Kategori wajib dipilih");
+    if (jenis === "masuk" && !metode) return tampilPesan(pesan, "Metode pembayaran wajib dipilih");
+
+    const body = {
+      tanggal, jenis, nominal,
+      keterangan: ket || null,
+    };
+    if (jenis !== "transfer") {
+      body.kategori_id = Number(kid);
+      body.metode = metode || null;
+      if (jenis === "keluar") body.sumber_kas = sumber;
+    } else {
+      body.sumber_kas = sumber;
+    }
+
+    const btn = $("btn-simpan-edit");
+    btn.disabled = true; btn.textContent = "Menyimpan…";
+    try {
+      await api(`/api/transaksi/${id}`, { method: "PUT", body });
+      modalEdit.close();
+      toast("Transaksi berhasil diubah ✓");
+      await Promise.all([muatSaldo(), muatRiwayat()]);
+    } catch (err) {
+      tampilPesan(pesan, err.message);
+    } finally {
+      btn.disabled = false; btn.textContent = "Simpan Perubahan";
+    }
+  });
+
+  $("btn-konfirmasi-hapus")?.addEventListener("click", async () => {
+    if (!idTransaksiHapus) return;
+    const btn = $("btn-konfirmasi-hapus");
+    btn.disabled = true; btn.textContent = "Menghapus…";
+    try {
+      await api(`/api/transaksi/${idTransaksiHapus}`, { method: "DELETE" });
+      modalHapus.close();
+      toast("Transaksi berhasil dihapus ✓");
+      await Promise.all([muatSaldo(), muatRiwayat()]);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      btn.disabled = false; btn.textContent = "Ya, Hapus";
+      idTransaksiHapus = null;
+    }
+  });
+}
 
 // ---------- mulai ----------
 (async function init() {

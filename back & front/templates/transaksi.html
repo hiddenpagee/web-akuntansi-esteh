@@ -77,7 +77,15 @@
     </form>
     <div class="tabel-wrap">
       <table class="tabel-kartu">
-        <thead><tr><th>Tanggal</th><th>Kategori</th><th>Kas</th><th class="kanan">Nominal</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Kategori</th>
+            <th>Kas</th>
+            <th class="kanan">Nominal</th>
+            {% if role == 'pemilik' %}<th class="kanan">Aksi</th>{% endif %}
+          </tr>
+        </thead>
         <tbody id="isi-tabel"></tbody>
       </table>
     </div>
@@ -90,6 +98,73 @@
   </section>
   </div>
 </main>
+
+{% if role == 'pemilik' %}
+<dialog id="modal-edit">
+  <h2>Edit Transaksi</h2>
+  <div id="pesan-modal-edit" class="alert" role="alert" hidden></div>
+  <form id="form-edit" novalidate>
+    <input type="hidden" id="edit-id">
+    
+    <label for="edit-tanggal">Tanggal</label>
+    <input id="edit-tanggal" type="date" required>
+
+    <label for="edit-jenis">Jenis Transaksi</label>
+    <select id="edit-jenis">
+      <option value="masuk">Pemasukan</option>
+      <option value="keluar">Pengeluaran</option>
+      <option value="transfer">Isi Ulang Kas Kecil (Transfer)</option>
+    </select>
+
+    <div id="edit-kotak-kategori">
+      <label for="edit-kategori">Kategori</label>
+      <select id="edit-kategori"></select>
+    </div>
+
+    <label for="edit-nominal">Nominal (Rp)</label>
+    <input id="edit-nominal" type="text" inputmode="numeric" required placeholder="0">
+
+    <div id="edit-kotak-sumber">
+      <label for="edit-sumber">Sumber Kas</label>
+      <select id="edit-sumber">
+        <option value="tangan">Kas di Tangan</option>
+        <option value="bank">Kas di Bank</option>
+        <option value="kecil">Kas Kecil</option>
+      </select>
+    </div>
+
+    <div id="edit-kotak-metode">
+      <label for="edit-metode">Metode Bayar</label>
+      <select id="edit-metode">
+        <option value="">— tidak ditentukan —</option>
+        <option value="tunai">Tunai</option>
+        <option value="qris">QRIS</option>
+      </select>
+      <small id="edit-info-kas-masuk" class="redup" hidden>Tunai masuk ke Kas di Tangan, QRIS ke Kas di Bank.</small>
+    </div>
+
+    <label for="edit-keterangan">Keterangan <small class="redup">(opsional)</small></label>
+    <input id="edit-keterangan" type="text" maxlength="200" placeholder="Keterangan transaksi">
+
+    <div class="aksi">
+      <button type="button" id="btn-batal-edit" class="sekunder">Batal</button>
+      <button type="submit" id="btn-simpan-edit" class="utama" style="margin-top:0">Simpan Perubahan</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="modal-hapus">
+  <h2>Hapus Transaksi</h2>
+  <div class="alert">
+    <strong>Perhatian:</strong> Transaksi akan dihapus permanen. Saldo kas dan laporan keuangan akan diperbarui secara otomatis.
+  </div>
+  <p id="hapus-info" style="font-size:.9rem; color:var(--redup); margin:.75rem 0;"></p>
+  <div class="aksi">
+    <button type="button" id="btn-batal-hapus" class="sekunder">Batal</button>
+    <button type="button" id="btn-konfirmasi-hapus" class="bahaya">Ya, Hapus</button>
+  </div>
+</dialog>
+{% endif %}
 
 <div id="toast" role="status" aria-live="polite" hidden></div>
 {% endblock %}

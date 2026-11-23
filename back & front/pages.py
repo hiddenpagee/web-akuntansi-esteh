@@ -66,11 +66,29 @@ def jurnal_petty_cash():
     return render_template("jurnal_petty_cash.html", nama=session["nama"], role=session["role"], page="jurnal_petty_cash")
 
 
+def _ambil_ip_lokal():
+    import socket
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "127.0.0.1"
+
+
 @bp.get("/qris-demo")
 def qris_demo():
-    """Halaman simulator HP pembeli. Publik, tapi hanya ada kalau QRIS_SIMULATOR=1."""
-    import os
-    from flask import abort
-    if os.environ.get("QRIS_SIMULATOR") != "1":
+    """Halaman simulator HP pembeli & testing QRIS."""
+    import qris
+    from flask import abort, request
+    if not qris.simulator_aktif():
         abort(404)
-    return render_template("qris_demo.html")
+    host = request.host
+    port = host.split(":")[1] if ":" in host else ""
+    ip_lokal = _ambil_ip_lokal()
+    url_hp = f"http://{ip_lokal}:{port}/qris-demo" if port else f"http://{ip_lokal}/qris-demo"
+    if not host.startswith(("localhost", "127.0.0.1")):
+        url_hp = request.base_url
+    return render_template("qris_demo.html", url_hp=url_hp, ip_lokal=ip_lokal)

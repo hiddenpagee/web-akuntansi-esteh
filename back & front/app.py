@@ -33,7 +33,7 @@ def create_app(test_config: dict | None = None) -> Flask:
     from pathlib import Path
     load_dotenv(Path(__file__).parent / ".env")
     load_dotenv()
-    app = Flask(__name__, static_folder="pulic/static")
+    app = Flask(__name__, static_folder="public/static")
     app.config.update(
         SECRET_KEY=os.environ.get("FLASK_SECRET_KEY"),
         SESSION_COOKIE_HTTPONLY=True,
@@ -62,8 +62,11 @@ def create_app(test_config: dict | None = None) -> Flask:
     def wajib_json():
         # Selain input yang rapi, ini menutup CSRF lewat form lintas situs:
         # form HTML biasa tidak bisa mengirim Content-Type application/json.
-        if request.method in ("POST", "PUT", "PATCH", "DELETE") and request.path.startswith("/api/"):
+        if request.method in ("POST", "PUT", "PATCH") and request.path.startswith("/api/"):
             if not request.is_json:
+                return jsonify(error=PESAN_HTTP[415]), 415
+        elif request.method == "DELETE" and request.path.startswith("/api/"):
+            if request.data and not request.is_json:
                 return jsonify(error=PESAN_HTTP[415]), 415
 
     @app.after_request

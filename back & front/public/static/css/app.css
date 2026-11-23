@@ -159,10 +159,10 @@ padding:.7rem 1rem;border-radius:99px;box-shadow:0 4px 14px rgba(0,0,0,.2);z-ind
 .halaman{flex-wrap:wrap;justify-content:center}
 .halaman #info-halaman{order:-1;width:100%;text-align:center}
 .halaman button{flex:1}
-/* tabel transaksi -> kartu (kolom: tanggal, kategori, kas/tipe, nominal) */
+/* tabel transaksi -> kartu (kolom: tanggal, kategori, kas/tipe, nominal, aksi) */
 .tabel-kartu thead{display:none}
 .tabel-kartu,.tabel-kartu tbody{display:block;width:100%}
-.tabel-kartu tr{display:grid;grid-template-columns:1fr auto;grid-template-areas:"tgl nom" "ket ket" "kas kas";
+.tabel-kartu tr{display:grid;grid-template-columns:1fr auto;grid-template-areas:"tgl nom" "ket ket" "kas kas" "aksi aksi";
 gap:.15rem .75rem;padding:.7rem .15rem;border-bottom:1px solid var(--garis)}
 .tabel-kartu td{display:block;border:0;padding:0;min-width:0}
 .tabel-kartu td:nth-child(1){grid-area:tgl;color:var(--redup);font-size:.8rem}
@@ -171,6 +171,7 @@ gap:.15rem .75rem;padding:.7rem .15rem;border-bottom:1px solid var(--garis)}
 .tabel-kartu td:nth-child(3){grid-area:kas;font-size:.82rem;color:var(--redup)}
 .tabel-kartu td:nth-child(3)::before{content:attr(data-label) ": "}
 .tabel-kartu td:nth-child(4){grid-area:nom;font-size:1.05rem;align-self:center}
+.tabel-kartu td:nth-child(5){grid-area:aksi;display:flex;gap:.4rem;justify-content:flex-end;margin-top:.25rem}
 .tabel-kartu tr.batal td:nth-child(4){text-decoration:line-through}
 /* tabel buku (jurnal/laporan) tetap tabel, geser samping */
 .tabel-wrap table:not(.tabel-kartu){min-width:520px}
@@ -207,7 +208,7 @@ gap:.15rem .75rem;padding:.7rem .15rem;border-bottom:1px solid var(--garis)}
 .hp-atas{display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem}
 .hp-atas small{display:block;color:var(--redup);font-size:.78rem}
 .qr-toko{display:grid;justify-items:center;gap:.5rem;text-align:center}
-.qr-toko svg{width:190px;height:190px;color:#222;background:#fff;padding:8px;border:1px solid var(--garis);border-radius:6px}
+.qr-toko svg, .qr-toko canvas, .qr-toko img{width:190px;height:190px;color:#222;background:#fff;padding:8px;border:1px solid var(--garis);border-radius:6px;display:block;margin:0 auto}
 .input-rupiah{display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem}
 .input-rupiah span{font-weight:700;font-size:1.2rem}
 .input-rupiah input{font-size:1.5rem;font-weight:700;text-align:right;margin:0}
