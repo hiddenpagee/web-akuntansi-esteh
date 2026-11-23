@@ -27,7 +27,7 @@ button:disabled{opacity:.6;cursor:not-allowed}
 
 /* layout & navbar */
 .topbar{display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:center;justify-content:space-between;
-background:#fff;border-bottom:1px solid var(--garis);padding:.6rem 1rem;position:sticky;top:0;z-index:10}
+background:#fff;border-bottom:1px solid var(--garis);padding:.6rem max(1rem,calc((100% - 1100px)/2 + 1rem));position:sticky;top:0;z-index:10}
 .topbar-kiri{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:.4rem;text-decoration:none;color:var(--utama-gelap);font-size:1.05rem}
 .nav-menu{display:flex;gap:.25rem;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:.2rem 0}
@@ -38,7 +38,9 @@ background:#fff;border-bottom:1px solid var(--garis);padding:.6rem 1rem;position
 .badge-role{background:#eef2ef;padding:2px 8px;border-radius:99px;font-size:.75rem;font-weight:600;text-transform:uppercase}
 .btn-sm{min-height:36px;padding:.35rem .75rem;font-size:.85rem}
 
-.isi{max-width:920px;margin:0 auto;padding:1rem;display:grid;gap:1rem}
+.isi{max-width:1100px;margin:0 auto;padding:1rem;display:grid;gap:1rem}
+.dua-kolom{display:grid;grid-template-columns:1fr;gap:1rem;align-items:start}
+@media(min-width:900px){.dua-kolom{grid-template-columns:minmax(300px,2fr) 3fr}.dua-kolom.rata{grid-template-columns:1fr 1fr}}
 .saldo{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem}
 .saldo .kartu{display:flex;flex-direction:column;gap:.15rem}
 .saldo b{font-size:1.35rem}
@@ -92,7 +94,7 @@ background:#fff;border-bottom:1px solid var(--garis);padding:.6rem 1rem;position
 .chip:hover{background:#eaf5f0;border-color:var(--utama);color:var(--utama)}
 .kartu-info{background:#f0f4f8;border:1px solid #d0deec}
 .info-hak-akses{display:flex;gap:.75rem;align-items:center;font-size:.95rem}
-@media(min-width:640px){.tag-masuk{background:#e8f6ee;color:#14532d}
+.tag-masuk{background:#e8f6ee;color:#14532d}
 .tag-keluar{background:#fdecea;color:var(--merah)}
 
 /* laporan & buku kas */
@@ -127,13 +129,56 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 #toast{position:fixed;left:50%;bottom:1.25rem;transform:translateX(-50%);background:#14532d;color:#fff;
 padding:.7rem 1rem;border-radius:99px;box-shadow:0 4px 14px rgba(0,0,0,.2);z-index:20}
 
-/* mobile optimization */
-@media(max-width:640px){
-.topbar{padding:.5rem .75rem}
+/* ===== responsif ===== */
+@media(min-width:701px){
+.topbar{flex-wrap:nowrap}
+.topbar-kiri{flex:1;min-width:0;flex-wrap:nowrap}
+.nav-menu{min-width:0}
+.nav-menu a{padding:.4rem .6rem}
+.user{flex:none}
+.brand{white-space:nowrap}
+.topbar-kiri{gap:.5rem}
+}
+@media(min-width:701px) and (max-width:1180px){.user-nama{display:none}}
+.nominal-besar{font-size:clamp(1.5rem,7vw,2rem)}
+.saldo b{font-size:clamp(1.1rem,4.5vw,1.35rem);overflow-wrap:anywhere}
+@media(max-width:700px){
+.topbar{display:grid;grid-template-columns:1fr auto;grid-template-areas:"brand user" "nav nav";gap:.35rem .5rem;padding:.5rem .75rem}
+.topbar-kiri{display:contents}
+.brand{grid-area:brand}.user{grid-area:user}
+.nav-menu{grid-area:nav;margin:0 -.75rem;padding:.2rem .75rem;gap:.35rem;
+-webkit-mask-image:linear-gradient(to right,#000 92%,transparent);mask-image:linear-gradient(to right,#000 92%,transparent);scrollbar-width:none}
+.nav-menu::-webkit-scrollbar{display:none}
+.nav-menu a{background:#f3f1ea;padding:.4rem .85rem;border-radius:99px;font-size:.88rem}
+.nav-menu a[aria-current]{background:var(--utama);color:#fff}
+.user-nama{display:none}
 .isi{padding:.75rem .5rem}
 .kartu{padding:.85rem}
+.saldo{grid-template-columns:1fr 1fr}
+.baris-header-kartu h2{font-size:1rem}
+.halaman{flex-wrap:wrap;justify-content:center}
+.halaman #info-halaman{order:-1;width:100%;text-align:center}
+.halaman button{flex:1}
+/* tabel transaksi -> kartu (kolom: tanggal, kategori, kas/tipe, nominal) */
+.tabel-kartu thead{display:none}
+.tabel-kartu,.tabel-kartu tbody{display:block;width:100%}
+.tabel-kartu tr{display:grid;grid-template-columns:1fr auto;grid-template-areas:"tgl nom" "ket ket" "kas kas";
+gap:.15rem .75rem;padding:.7rem .15rem;border-bottom:1px solid var(--garis)}
+.tabel-kartu td{display:block;border:0;padding:0;min-width:0}
+.tabel-kartu td:nth-child(1){grid-area:tgl;color:var(--redup);font-size:.8rem}
+.tabel-kartu td:nth-child(2){grid-area:ket;font-weight:600}
+.tabel-kartu td:nth-child(2) small{font-weight:400}
+.tabel-kartu td:nth-child(3){grid-area:kas;font-size:.82rem;color:var(--redup)}
+.tabel-kartu td:nth-child(3)::before{content:attr(data-label) ": "}
+.tabel-kartu td:nth-child(4){grid-area:nom;font-size:1.05rem;align-self:center}
+.tabel-kartu tr.batal td:nth-child(4){text-decoration:line-through}
+/* tabel buku (jurnal/laporan) tetap tabel, geser samping */
+.tabel-wrap table:not(.tabel-kartu){min-width:520px}
+.tabel-wrap table:not(.tabel-kartu) td,.tabel-wrap table:not(.tabel-kartu) th{white-space:nowrap}
+.tabel-wrap table:not(.tabel-kartu) td:nth-child(2){white-space:normal;min-width:130px}
+.rekap-kolom table{min-width:0!important}
 }
-
+@media(min-width:701px){.tabel-kartu td::before{content:none}}
 /* tanggal otomatis */
 .tgl-otomatis{min-height:44px;display:flex;align-items:center;padding:0 .75rem;border:1px dashed var(--garis);border-radius:8px;color:var(--redup)}
 .tautan{background:none;border:0;padding:0;min-height:0;margin-top:.3rem;color:var(--utama);font-size:.85rem;text-decoration:underline}

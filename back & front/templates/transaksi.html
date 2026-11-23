@@ -11,6 +11,7 @@
       <span id="peringatan-kecil" class="badge-merah" hidden>Menipis</span></div>
   </section>
 
+  <div class="dua-kolom">
   <section class="kartu">
     <h2>Catat transaksi</h2>
     <div id="pesan-form" class="alert" role="alert" hidden></div>
@@ -75,7 +76,7 @@
       <input id="f-sampai" type="date" aria-label="Sampai tanggal">
     </form>
     <div class="tabel-wrap">
-      <table>
+      <table class="tabel-kartu">
         <thead><tr><th>Tanggal</th><th>Kategori</th><th>Kas</th><th class="kanan">Nominal</th></tr></thead>
         <tbody id="isi-tabel"></tbody>
       </table>
@@ -87,6 +88,7 @@
       <button id="next" class="sekunder">Berikutnya ›</button>
     </div>
   </section>
+  </div>
 </main>
 
 <div id="toast" role="status" aria-live="polite" hidden></div>

@@ -19,6 +19,7 @@
     </div>
   </section>
 
+  <div class="dua-kolom">
   <!-- Form Isi Ulang (Khusus Pemilik) -->
   {% if role == 'pemilik' %}
   <section class="kartu" id="kotak-isi-ulang">
@@ -68,7 +69,7 @@
       <small class="redup">Maksimal 50 mutasi terakhir</small>
     </div>
     <div class="tabel-wrap">
-      <table>
+      <table class="tabel-kartu">
         <thead>
           <tr>
             <th>Tanggal</th>
@@ -82,6 +83,7 @@
     </div>
     <p id="kosong-mutasi" class="redup" hidden>Belum ada catatan mutasi kas kecil.</p>
   </section>
+  </div>
 </main>
 
 <div id="toast" role="status" aria-live="polite" hidden></div>

@@ -60,3 +60,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+// Responsif: isi data-label tiap sel dari judul kolom (dipakai tampilan kartu di HP)
+function pasangLabelTabel(tabel) {
+  const judul = [...tabel.querySelectorAll("thead th")].map((th) => th.textContent.trim());
+  tabel.querySelectorAll("tbody tr").forEach((tr) => {
+    [...tr.children].forEach((td, i) => {
+      if (td.colSpan === 1 && judul[i] && !td.dataset.label) td.dataset.label = judul[i];
+    });
+  });
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("table").forEach((tabel) => {
+    const tb = tabel.querySelector("tbody");
+    if (!tb) return;
+    new MutationObserver(() => pasangLabelTabel(tabel)).observe(tb, { childList: true });
+    pasangLabelTabel(tabel);
+  });
+  const aktif = document.querySelector(".nav-menu [aria-current]");
+  if (aktif) aktif.scrollIntoView({ inline: "center", block: "nearest" });
+});
